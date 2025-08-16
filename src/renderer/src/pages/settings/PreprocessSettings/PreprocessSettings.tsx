@@ -118,7 +118,7 @@ const PreprocessProviderSettings: FC<Props> = ({ provider: _provider }) => {
         </>
       )}
 
-      {hasObjectKey(preprocessProvider, 'apiHost') && (
+      {hasObjectKey(preprocessProvider, 'apiHost') && preprocessProvider.id !== 'mineru_local' && (
         <>
           <SettingSubtitle style={{ marginTop: 5, marginBottom: 10 }}>
             {t('settings.provider.api_host')}

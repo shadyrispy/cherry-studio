@@ -11,6 +11,10 @@ export function getPreprocessProviderLogo(providerId: PreprocessProviderId) {
       return MistralLogo
     case 'mineru':
       return MinerULogo
+    case 'mineru_local':
+      return MinerULogo
+    case 'dots_ocr':
+      return MinerULogo
     default:
       return undefined
   }
@@ -35,6 +39,12 @@ export const PREPROCESS_PROVIDER_CONFIG: Record<PreprocessProviderId, Preprocess
     websites: {
       official: 'https://mineru.net/',
       apiKey: 'https://mineru.net/apiManage'
+    }
+  },
+  dots_ocr: {
+    websites: {
+      official: 'https://github.com/rednote-hilab/dots.ocr',
+      apiKey: ''
     }
   }
 }

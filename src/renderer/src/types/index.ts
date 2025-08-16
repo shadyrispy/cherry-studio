@@ -613,7 +613,9 @@ export type KnowledgeBaseParams = {
 export const PreprocessProviderIds = {
   doc2x: 'doc2x',
   mistral: 'mistral',
-  mineru: 'mineru'
+  mineru: 'mineru',
+  mineru_local: 'mineru_local',
+  dots_ocr: 'dots_ocr'
 } as const
 
 export type PreprocessProviderId = keyof typeof PreprocessProviderIds
