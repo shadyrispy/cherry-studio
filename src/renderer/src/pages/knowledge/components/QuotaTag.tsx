@@ -20,9 +20,9 @@ const QuotaTag: FC<{ base: KnowledgeBase; providerId: PreprocessProviderId; quot
 
   useEffect(() => {
     const checkQuota = async () => {
-      if (provider.id !== 'mineru') return
-      // 使用用户的key时quota为无限
-      if (provider.apiKey) {
+      if (provider.id !== 'mineru' && provider.id !== 'mineru_local') return
+      // 使用用户的key时quota为无限（仅云端 mineru）
+      if (provider.id === 'mineru' && provider.apiKey) {
         setQuota(-9999)
         updateProvider({ quota: -9999 })
         return

@@ -15,6 +15,10 @@ const initialState: PreprocessState = {
       apiHost: 'https://mineru.net'
     },
     {
+      id: 'mineru_local',
+      name: 'MinerU 本地部署'
+    },
+    {
       id: 'doc2x',
       name: 'Doc2x',
       apiKey: '',

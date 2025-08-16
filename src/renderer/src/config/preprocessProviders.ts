@@ -11,6 +11,8 @@ export function getPreprocessProviderLogo(providerId: PreprocessProviderId) {
       return MistralLogo
     case 'mineru':
       return MinerULogo
+    case 'mineru_local':
+      return MinerULogo
     default:
       return undefined
   }
