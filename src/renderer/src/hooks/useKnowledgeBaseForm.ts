@@ -51,7 +51,7 @@ export const useKnowledgeBaseForm = (base?: KnowledgeBase) => {
       label: t('settings.tool.preprocess.provider'),
       title: t('settings.tool.preprocess.provider'),
       options: preprocessProviders
-        .filter((p) => p.apiKey !== '' || p.id === 'mineru' || p.id === 'mineru_local')
+        .filter((p) => p.apiKey !== '' || p.id === 'mineru' || p.id === 'mineru_local' || p.id === 'dots_ocr')
         .map((p) => ({ value: p.id, label: p.name }))
     }
     return [preprocessOptions]

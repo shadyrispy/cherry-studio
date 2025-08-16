@@ -19,6 +19,11 @@ const initialState: PreprocessState = {
       name: 'MinerU 本地部署'
     },
     {
+      id: 'dots_ocr',
+      name: 'dots.ocr 本地部署',
+      apiHost: 'http://127.0.0.1:8000'
+    },
+    {
       id: 'doc2x',
       name: 'Doc2x',
       apiKey: '',
