@@ -31,6 +31,7 @@ import { fileStorage } from '@main/services/FileStorage'
 import { windowService } from '@main/services/WindowService'
 import { getDataPath } from '@main/utils'
 import { getAllFiles } from '@main/utils/file'
+import { convertOfdToPdf } from '@main/utils/ofd'
 import { TraceMethod } from '@mcp-trace/trace-core'
 import { MB } from '@shared/config/constant'
 import type { LoaderReturn } from '@shared/config/types'
@@ -687,32 +688,59 @@ class KnowledgeService {
     userId: string
   ): Promise<FileMetadata> => {
     let fileToProcess: FileMetadata = file
-    if (base.preprocessProvider && file.ext.toLowerCase() === '.pdf') {
-      try {
-        const provider = new PreprocessProvider(base.preprocessProvider.provider, userId)
-        const filePath = fileStorage.getFilePathById(file)
-        // Check if file has already been preprocessed
-        const alreadyProcessed = await provider.checkIfAlreadyProcessed(file)
-        if (alreadyProcessed) {
-          logger.debug(`File already preprocess processed, using cached result: ${filePath}`)
-          return alreadyProcessed
-        }
 
-        // Execute preprocessing
-        logger.debug(`Starting preprocess processing for scanned PDF: ${filePath}`)
-        const { processedFile, quota } = await provider.parseFile(item.id, file)
-        fileToProcess = processedFile
-        const mainWindow = windowService.getMainWindow()
-        mainWindow?.webContents.send('file-preprocess-finished', {
-          itemId: item.id,
-          quota: quota
-        })
-      } catch (err) {
-        logger.error(`Preprocess processing failed: ${err}`)
-        // If preprocessing fails, use original file
-        // fileToProcess = file
-        throw new Error(`Preprocess processing failed: ${err}`)
+    if (!base.preprocessProvider) {
+      return fileToProcess
+    }
+
+    try {
+      const provider = new PreprocessProvider(base.preprocessProvider.provider, userId)
+
+      // If already preprocessed, return cached result (independent of original ext)
+      const alreadyProcessed = await provider.checkIfAlreadyProcessed(file)
+      if (alreadyProcessed) {
+        const fp = fileStorage.getFilePathById(file)
+        logger.debug(`File already preprocess processed, using cached result: ${fp}`)
+        return alreadyProcessed
       }
+
+      // Convert OFD to PDF if needed
+      let workingFile: FileMetadata = file
+      const ext = file.ext.toLowerCase()
+      if (ext === '.ofd') {
+        const pdfMeta: FileMetadata = {
+          ...file,
+          name: file.id + '.pdf',
+          origin_name: file.origin_name.replace(/\.ofd$/i, '.pdf'),
+          ext: '.pdf'
+        }
+        const inputPath = fileStorage.getFilePathById(file)
+        const outputPath = fileStorage.getFilePathById(pdfMeta)
+        await convertOfdToPdf(inputPath, outputPath)
+        const fs = await import('node:fs')
+        const stats = fs.statSync(outputPath)
+        workingFile = {
+          ...pdfMeta,
+          path: outputPath,
+          size: stats.size
+        }
+      } else if (ext !== '.pdf') {
+        // Not a PDF nor OFD, skip preprocessing
+        return fileToProcess
+      }
+
+      const filePath = fileStorage.getFilePathById(workingFile)
+      logger.debug(`Starting preprocess processing for scanned PDF: ${filePath}`)
+      const { processedFile, quota } = await provider.parseFile(item.id, workingFile)
+      fileToProcess = processedFile
+      const mainWindow = windowService.getMainWindow()
+      mainWindow?.webContents.send('file-preprocess-finished', {
+        itemId: item.id,
+        quota: quota
+      })
+    } catch (err) {
+      logger.error(`Preprocess processing failed: ${err}`)
+      throw new Error(`Preprocess processing failed: ${err}`)
     }
 
     return fileToProcess
